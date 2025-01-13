@@ -1,4 +1,16 @@
-<html><head><base href="https://stackpath.bootstrapcdn.com/">
+<html><head>
+  <link rel="manifest" href="manifest.json">
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(function(reg) {
+      console.log('Service Worker registrado com sucesso:', reg);
+    }).catch(function(err) {
+      console.error('Erro ao registrar o Service Worker:', err);
+    });
+  }
+  </script>
+ 
+  <base href="https://stackpath.bootstrapcdn.com/">
   <link href="bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
