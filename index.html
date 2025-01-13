@@ -360,4 +360,75 @@ Café da Manhã, João, 89.90, João;Maria</textarea>
     // Processa as despesas de exemplo ao carregar
     document.getElementById('expenseForm').dispatchEvent(new Event('submit'));
   </script>
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+
+  const installButton = document.createElement('button');
+  installButton.textContent = 'Instalar App';
+  installButton.style = `
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  `;
+  document.body.appendChild(installButton);
+
+  installButton.addEventListener('click', () => {
+    installButton.style.display = 'none';
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('Usuário aceitou a instalação');
+      } else {
+        console.log('Usuário recusou a instalação');
+      }
+      deferredPrompt = null;
+    });
+  });
+});
+  <script>
+  let deferredPrompt;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+
+    const installButton = document.createElement('button');
+    installButton.textContent = 'Instalar App';
+    installButton.style = `
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    `;
+    document.body.appendChild(installButton);
+
+    installButton.addEventListener('click', () => {
+      installButton.style.display = 'none';
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('Usuário aceitou a instalação');
+        } else {
+          console.log('Usuário recusou a instalação');
+        }
+        deferredPrompt = null;
+      });
+    });
+  });
+</script>
+
 </body></html>
