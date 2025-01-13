@@ -1,0 +1,325 @@
+<html><head><base href="https://stackpath.bootstrapcdn.com/">
+  <link href="bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+    
+    .expense-form {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      background: white;
+      transition: all 0.3s ease;
+    }
+
+    @media (max-width: 768px) {
+      .expense-form {
+        margin: 1rem;
+        padding: 1rem;
+      }
+    }
+    
+    .expenses-list {
+      max-width: 800px;
+      margin: 2rem auto;
+    }
+
+    @media (max-width: 768px) {
+      .expenses-list {
+        margin: 1rem;
+      }
+    }
+    
+    .sample-format {
+      font-family: monospace;
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border-left: 4px solid #007bff;
+      font-size: 0.9rem;
+    }
+
+    .card {
+      transition: transform 0.2s ease;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 0.75rem;
+    }
+
+    .card-body {
+      padding: 1rem;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn {
+      border-radius: 6px;
+      padding: 0.5rem 1.5rem;
+      font-weight: 500;
+    }
+
+    .btn-primary {
+      background: #007bff;
+      border: none;
+      box-shadow: 0 2px 4px rgba(0,123,255,0.2);
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      border: none;
+      margin-left: 0.5rem;
+    }
+
+    textarea.form-control {
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    textarea.form-control:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.2rem rgba(0,123,255,.15);
+    }
+
+    .alert {
+      border-radius: 8px;
+      border: none;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    h1 {
+      color: #2c3e50;
+      font-weight: 600;
+    }
+
+    h3, h4, h5 {
+      color: #2c3e50;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    .summary-section {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-top: 1.5rem;
+    }
+
+    .summary-section h5 {
+      margin-bottom: 0.75rem;
+      font-size: 1.1rem;
+    }
+
+    .floating-feedback {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 1rem;
+      border-radius: 8px;
+      background: #28a745;
+      color: white;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 1000;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      animation: fadeIn 0.3s ease;
+    }
+
+    .compact-alert {
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center my-4">Despesas de Viagem - CSV</h1>
+    
+    <div class="expense-form">
+      <h3 class="mb-3">Entrada de Despesas</h3>
+      <div class="sample-format">
+        <strong>Formato:</strong> Nome da Despesa, Quem Pagou, Valor, Participantes (separados por ;)<br>
+        <em>Exemplo:</em><br>
+        Almoço, João, 150.00, João;Maria;Pedro<br>
+        Uber, Maria, 50.00, João;Maria
+      </div>
+      
+      <form id="expenseForm">
+        <div class="form-group">
+          <label for="csvInput">Cole as despesas (uma por linha):</label>
+          <textarea class="form-control" id="csvInput" rows="10" required>Almoço no Shopping, João, 180.00, João;Maria;Pedro
+Uber para o Hotel, Maria, 75.50, João;Maria;Pedro
+Ingresso Museu, Pedro, 120.00, João;Maria;Pedro
+Café da Manhã, João, 89.90, João;Maria</textarea>
+        </div>
+        
+        <div class="d-flex flex-wrap gap-2">
+          <button type="submit" class="btn btn-primary">Processar Despesas</button>
+          <button type="button" class="btn btn-secondary" onclick="clearForm()">Limpar</button>
+        </div>
+      </form>
+    </div>
+    
+    <div class="expenses-list">
+      <h3>Despesas Registradas</h3>
+      <div id="expensesList"></div>
+      
+      <div class="summary-section">
+        <h4 class="mb-3">Resumo de Pagamentos</h4>
+        <div id="summary"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="feedback" class="floating-feedback" style="display: none;">
+    Despesas processadas com sucesso!
+  </div>
+
+  <script>
+    let expenses = [];
+    
+    function showFeedback(message) {
+      const feedback = document.getElementById('feedback');
+      feedback.textContent = message;
+      feedback.style.display = 'block';
+      feedback.style.opacity = '1';
+      
+      setTimeout(() => {
+        feedback.style.opacity = '0';
+        setTimeout(() => {
+          feedback.style.display = 'none';
+        }, 300);
+      }, 2000);
+    }
+    
+    function parseCSVLine(line) {
+      const parts = line.split(',').map(part => part.trim());
+      if (parts.length < 4) return null;
+      
+      return {
+        name: parts[0],
+        person: parts[1],
+        amount: parseFloat(parts[2]),
+        participants: parts[3].split(';').map(p => p.trim()),
+        date: new Date()
+      };
+    }
+    
+    function clearForm() {
+      document.getElementById('csvInput').value = '';
+      expenses = [];
+      updateExpensesList();
+      calculateSummary();
+      showFeedback('Formulário limpo com sucesso!');
+    }
+    
+    document.getElementById('expenseForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const csvText = document.getElementById('csvInput').value;
+      const lines = csvText.split('\n');
+      
+      expenses = lines
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .map(parseCSVLine)
+        .filter(expense => expense !== null);
+      
+      updateExpensesList();
+      calculateSummary();
+      showFeedback('Despesas processadas com sucesso!');
+    });
+    
+    function updateExpensesList() {
+      const list = document.getElementById('expensesList');
+      list.innerHTML = expenses.map(expense => `
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-2">${expense.name}</h5>
+            <h6 class="card-subtitle mb-2 text-muted">Pago por: ${expense.person}</h6>
+            <p class="card-text mb-0">
+              <strong>Valor:</strong> R$ ${expense.amount.toFixed(2)}<br>
+              <strong>Participantes:</strong> ${expense.participants.join(', ')}
+            </p>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function calculateSummary() {
+      const summary = {};
+      
+      expenses.forEach(expense => {
+        const perPerson = expense.amount / expense.participants.length;
+        
+        if (!summary[expense.person]) summary[expense.person] = 0;
+        summary[expense.person] += expense.amount;
+        
+        expense.participants.forEach(participant => {
+          if (!summary[participant]) summary[participant] = 0;
+          summary[participant] -= perPerson;
+        });
+      });
+      
+      const summaryDiv = document.getElementById('summary');
+      summaryDiv.innerHTML = `
+        <h5>Saldos:</h5>
+        <div class="mb-3">
+          ${Object.entries(summary)
+            .map(([person, amount]) => `
+              <div class="alert ${amount >= 0 ? 'alert-success' : 'alert-danger'} compact-alert">
+                ${person}: ${amount >= 0 ? 'Recebe' : 'Deve'} R$ ${Math.abs(amount).toFixed(2)}
+              </div>
+            `).join('')}
+        </div>
+        
+        <h5>Pagamentos Sugeridos:</h5>
+        ${generatePaymentSuggestions(summary)}
+      `;
+    }
+    
+    function generatePaymentSuggestions(summary) {
+      const debtors = Object.entries(summary).filter(([_, amount]) => amount < 0);
+      const creditors = Object.entries(summary).filter(([_, amount]) => amount > 0);
+      let suggestions = '';
+      
+      debtors.forEach(([debtor, debtAmount]) => {
+        creditors.forEach(([creditor, creditAmount]) => {
+          const paymentAmount = Math.min(Math.abs(debtAmount), creditAmount);
+          if (paymentAmount > 0.01) {
+            suggestions += `
+              <div class="alert alert-info compact-alert">
+                ${debtor} deve pagar R$ ${paymentAmount.toFixed(2)} para ${creditor}
+              </div>
+            `;
+          }
+        });
+      });
+      
+      return suggestions || '<div class="alert alert-warning compact-alert">Não há pagamentos necessários</div>';
+    }
+    
+    // Processa as despesas de exemplo ao carregar
+    document.getElementById('expenseForm').dispatchEvent(new Event('submit'));
+  </script>
+</body></html>
