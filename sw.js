@@ -11,7 +11,7 @@ self.addEventListener('install', function(event) {
     })
   );
 });
-
+console.log('Service Worker instalado e ativado.');
 self.addEventListener('fetch', function(event) {
   event.respondWith(
     caches.match(event.request).then(function(response) {
