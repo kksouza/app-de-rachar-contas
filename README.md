@@ -26,7 +26,7 @@ Um agradecimento especial ao **Baca**, **Sucrilhos** e **GAK** e ao **fundão** 
 
 ## Como Usar
 
-1. **Acesse o aplicativo**: [Link do GitHub Pages](https://github.com/kksouza/app-de-rachar-contas).
+1. **Acesse o aplicativo**: [Link do GitHub Pages](https://kksouza.github.io/app-de-rachar-contas).
 2. **Insira as despesas**:
    - Cole os dados no campo de texto no formato: `Nome da Despesa, Quem Pagou, Valor, Participantes (separados por ";")`.
    - Exemplo:
